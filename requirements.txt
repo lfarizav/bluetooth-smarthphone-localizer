@@ -1,0 +1,6 @@
+# bluetooth-smarthphone-localizer -- runtime + test dependencies
+bleak>=3.0        # BLE scanning via BlueZ (Linux) / CoreBluetooth (macOS) / WinRT (Windows)
+flask>=3.0         # single-page browser meter (Server-Sent Events, no build step)
+numpy>=1.24        # log-distance path-loss fit used by the meter's calibration panel
+scipy>=1.11        # test suite only: statistical checks on the path-loss fit
+pytest>=8.0        # test suite
