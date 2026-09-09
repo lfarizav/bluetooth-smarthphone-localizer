@@ -1773,7 +1773,11 @@ main{max-width:920px;margin:0 auto;padding:14px 16px 40px;display:flex;
 .ratio-num{font:800 44px/1.2 ui-monospace,monospace;color:var(--accent2)}
 .ratio-msg{font:12.5px/1.5 system-ui,sans-serif;color:var(--muted);margin-top:4px}
 .footnote{font:11px/1.5 system-ui,sans-serif;color:var(--muted);margin:14px 0 0}
-.langwrap{text-align:center;padding:4px 0 22px}
+#lang{margin-left:auto}
+.page-footer{text-align:center;padding:22px 16px 26px;margin-top:6px;
+  border-top:1px solid var(--border);font:12px/1.6 system-ui,sans-serif;
+  color:var(--muted)}
+.page-footer a{color:var(--muted)}
 .target-line{margin:.15rem 0 .6rem;font-size:.95rem;opacity:.85;
   display:flex;gap:.45rem;flex-wrap:wrap;align-items:baseline}
 .target-line .target-key{opacity:.7}
@@ -1785,6 +1789,7 @@ main{max-width:920px;margin:0 auto;padding:14px 16px 40px;display:flex;
   <h1 data-ui="title"></h1>
   <span class="badge" id="source-badge">&mdash;</span>
   <span class="badge stale" id="stale-badge" data-ui="stale_label"></span>
+  <button id="lang" data-ui="lang_button"></button>
 </header>
 <p class="target-line" id="target-line">
   <span class="target-key" id="target-label"></span>
@@ -1863,8 +1868,11 @@ main{max-width:920px;margin:0 auto;padding:14px 16px 40px;display:flex;
     <p class="footnote" data-ui="calib_core_spec_note"></p>
   </section>
 
-  <div class="langwrap"><button id="lang" data-ui="lang_button"></button></div>
 </main>
+<footer class="page-footer">
+  Hecho por Luis Felipe Ariza Vesga con amor &middot;
+  <a href="mailto:lfarizav@gmail.com">lfarizav@gmail.com</a>
+</footer>
 <script>
 (function(){
   "use strict";
