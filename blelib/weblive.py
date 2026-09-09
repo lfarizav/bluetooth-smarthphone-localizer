@@ -182,8 +182,8 @@ THEME = {
 #: hardcoded English anywhere" is enforced here, not just followed.
 LIVE_STRINGS: dict[str, dict] = {
     "ui": {
-        "title": {"es": "lab-06 · caza BLE en vivo",
-                  "en": "lab-06 · live BLE hunt"},
+        "title": {"es": "Bluetooth smarthphone localizer",
+                  "en": "Bluetooth smarthphone localizer"},
         "instruction": {"es": "Camina unos metros, luego quédate quieto ~10 s.",
                         "en": "Move a few metres, then stand still ~10 s."},
         "stale_label": {"es": "SIN SEÑAL", "en": "NO SIGNAL"},
@@ -1639,7 +1639,7 @@ def create_app(session: LiveSession):
 PAGE = r"""<!doctype html>
 <html><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>lab-06 &middot; caza BLE en vivo / live BLE hunt</title>
+<title>Bluetooth smarthphone localizer</title>
 <style>
 :root{
   --bg:#1E1E1E; --card:#161b22; --text:#F5F5F5; --muted:#BDBDBD;
@@ -1787,7 +1787,6 @@ main{max-width:920px;margin:0 auto;padding:14px 16px 40px;display:flex;
 <body>
 <header>
   <h1 data-ui="title"></h1>
-  <span class="badge" id="source-badge">&mdash;</span>
   <span class="badge stale" id="stale-badge" data-ui="stale_label"></span>
   <button id="lang" data-ui="lang_button"></button>
 </header>
@@ -2038,7 +2037,6 @@ main{max-width:920px;margin:0 auto;padding:14px 16px 40px;display:flex;
     $("target-display").textContent = tgt.display || "\u2014";
     $("target-flags").textContent = (tgt.flags && tgt.flags.length)
         ? ("\u00b7 " + tgt.flags.join(" \u00b7 ")) : "";
-    $("source-badge").textContent = data.source_label || "";
 
     var staleBadge = $("stale-badge"), staleLine = $("stale-line");
     if (data.stale) {
