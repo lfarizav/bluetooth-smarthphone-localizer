@@ -1,124 +1,99 @@
-# bluetooth-smarthphone-localizer
-
-Find your own phone by walking toward a bigger number on your screen.
-
-A tiny, single-purpose tool with exactly one real option: `--find-phone`. It
-scans for Google Fast Pair's advertised Bluetooth Low Energy service (UUID
-`0xFEF3`) — the one thing a modern Android phone reliably keeps broadcasting
-on its own, no pairing and no app required — locks onto the strongest one
-nearby, and keeps following it even as the phone rotates its Bluetooth
-address for privacy (which real phones do, every few minutes). A browser
-page shows one big signal-strength number, a trend arrow, and a sparkline.
-Walk around; when the number gets bigger, you're getting warmer.
-
-```
-python find_phone.py --find-phone
-```
-
-Then open the URL it prints and walk.
-
-## Before you run this
-
-- **Hunt only a device you own.** This finds a phone by radio signal
-  strength, not by pairing or by asking permission — that is exactly why it
-  must never be pointed at someone else's device.
-- Addresses are shown **redacted** (last two octets only) by default.
-  `--no-redact` reveals the full address; don't screen-record with that on.
-- This needs the target's Bluetooth **radio to be on and actively
-  advertising** — usually meaning the screen is on, or it was used
-  recently. It is not GPS and it does not work through airplane mode.
-- Signal strength (RSSI) is a rough, noisy proxy for distance, not a ruler —
-  expect the number to wobble. The trend (getting warmer/colder as you walk)
-  is the reliable part.
-
-## Install
-
-Needs Python 3.10+ and a Bluetooth adapter.
-
-```bash
-python3 -m venv .venv
-.venv/bin/pip install -r requirements.txt
-```
-
-On Linux this runs on top of BlueZ (already on almost every distro); on
-macOS and Windows [`bleak`](https://github.com/hbldh/bleak) talks to
-CoreBluetooth / WinRT respectively.
-
-## Run
-
-```bash
-.venv/bin/python find_phone.py --find-phone
-```
-
-Optional flags — everything else about this tool is deliberately fixed, not
-configurable:
-
-| Flag | Default | What it does |
-|---|---|---|
-| `--port N` | `8646` | web meter port |
-| `--host ADDR` | `127.0.0.1` | web meter bind address (keep it localhost unless you know you want it reachable from other machines) |
-| `--lang es\|en` | `en` | language of the browser page and console text |
-| `--no-redact` | off | show the full Bluetooth address once locked on |
-
-## Why Fast Pair
-
-A phone that is not currently paired or connected to anything mostly
-advertises **nothing identifying** on purpose — that's the privacy design
-BLE address rotation exists for. Google Fast Pair is the practical
-exception: modern Android phones keep broadcasting the Fast Pair service
-UUID (`0xFEF3`) on their own, so that any earbuds or accessory nearby can
-offer a one-tap pairing sheet. Hunting by that service UUID, instead of by a
-fixed Bluetooth address, is also what makes this survive an address
-rotation mid-hunt — the address changes, the fact that it's advertising Fast
-Pair does not.
-
-## How it works, briefly
-
-- `blelib/scan.py` — real BLE scanning over `bleak`. `ServiceAdvertSource`
-  filters advertisements down to the strongest device currently advertising
-  the target service UUID, and keeps "locking on" again by service UUID
-  every time the address underneath it rotates.
-- `blelib/hunt.py` / `blelib/signal.py` — turn a stream of raw RSSI readings
-  into one honest snapshot: a median over a short live window, a
-  warmer/colder trend, staleness detection, and a "this address may be
-  gone, not just weak" distinction for when a rotation actually happens.
-- `blelib/pathloss.py` — an optional calibration panel in the browser page:
-  feed it a couple of (distance, signal) points you measure yourself, and it
-  fits a log-distance path-loss model and reports how wide the resulting
-  distance estimate really is (indoor multipath means: wide — the honest
-  answer is "closer/further", not "N.N metres").
-- `blelib/weblive.py` — the browser meter itself: Flask + Server-Sent
-  Events, one self-contained HTML page, no external JavaScript or CDN.
-- `find_phone.py` — the entire CLI surface. It wires the above together with
-  one fixed configuration (`--mode live --service fef3`, in the vocabulary
-  the modules use internally) and refuses to do anything else.
-
-Run the test suite with `pytest` — the `blelib` modules carry their own
-tests (`tests/test_*.py`), ported unmodified. Comments in the source cite an
-internal design spec by section number (`SPEC N.N`) from the project this
-code was originally written for; those numbers are historical context, not
-something a reader here needs to chase down.
-
-## Design origin
-
-This tool's idea — find a lost phone by walking around with a live
-Bluetooth signal-strength meter — is not new. It follows a case reported
-publicly in August 2026, in which a phone with Find My disabled by MDM was
-located by walking an office while watching a Bluetooth signal-strength
-meter. The tool that was publicized for that is
-[`ben-z/findphone`](https://github.com/ben-z/findphone) (macOS, Swift; that
-repository has no `LICENSE` file, meaning all rights are reserved on its
-code). Its README was read **only for the design idea** — no line of its
-code was used, and none would have been useful here: this is an independent
-implementation, in Python, over BlueZ/`bleak`, targeting Fast Pair instead
-of a fixed address.
-
-## License
-
-Code in this repository is licensed under the [Apache License 2.0](LICENSE).
-
-Copyright © 2026 Luis Felipe Ariza Vesga.
+<h1 align="center">Bluetooth smarthphone localizer</h1>
+<p align="center"><b>🇬🇧 English below · 🇪🇸 Español más abajo</b></p>
 
 ---
 
-Hecho con amor por **Luis Felipe Ariza Vesga**. 🩵
+## 🇬🇧 English
+
+### The problem
+
+You lost your phone somewhere in the house. It's not ringing, or the ringer
+is off. This little tool helps you find it: run it, open a page in your
+browser, and walk around — a big number tells you when you're getting
+warmer or colder. No app to install on the phone, no GPS, no internet
+needed.
+
+<p align="center">
+  <img src="docs/screenshots/meter-en.png" alt="The meter, live, reading -61 dBm, same room, colder" width="640">
+</p>
+
+### How to use it
+
+```bash
+git clone https://github.com/lfarizav/bluetooth-smarthphone-localizer
+cd bluetooth-smarthphone-localizer
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+.venv/bin/python find_phone.py --find-phone
+```
+
+Open the link it prints in your browser, then walk. The number is signal
+strength — smaller (closer to 0) is stronger, closer. Watch the word under
+it: **warmer** means you're getting close, **colder** means turn around.
+
+**Needs:** a computer with Bluetooth, and the phone's screen recently on
+(or currently on) so it's actively broadcasting.
+
+### Please read this
+
+Only use this to find **your own** phone. It works by picking up the
+Bluetooth signal any nearby phone happens to be broadcasting — that is not
+an invitation to point it at someone else's.
+
+### Want the technical details?
+
+How it actually works under the hood, why it uses Google Fast Pair, and
+the design credit for the idea all live in **[docs/TECHNICAL.md](docs/TECHNICAL.md)**,
+kept out of this page on purpose.
+
+---
+
+## 🇪🇸 Español
+
+### El problema
+
+Perdiste tu teléfono en algún lugar de la casa. No suena, o el timbre está
+apagado. Esta pequeña herramienta te ayuda a encontrarlo: la ejecutas,
+abres una página en tu navegador, y caminas — un número grande te dice si
+te estás acercando o alejando. No necesita instalar nada en el teléfono,
+no usa GPS, no necesita internet.
+
+<p align="center">
+  <img src="docs/screenshots/meter-es.png" alt="El medidor, en vivo, marcando -59 dBm, misma mesa, más frío" width="640">
+</p>
+
+### Cómo usarlo
+
+```bash
+git clone https://github.com/lfarizav/bluetooth-smarthphone-localizer
+cd bluetooth-smarthphone-localizer
+python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
+.venv/bin/python find_phone.py --find-phone
+```
+
+Abre en tu navegador el enlace que imprime, y camina. El número es
+intensidad de señal: mientras más pequeño (más cerca de 0), más fuerte,
+más cerca. Fíjate en la palabra debajo: **más caliente** significa que te
+acercas, **más frío** significa que te alejas.
+
+**Necesita:** un computador con Bluetooth, y que la pantalla del teléfono
+haya estado encendida hace poco (o esté encendida ahora), para que esté
+anunciándose activamente.
+
+### Por favor lee esto
+
+Úsalo solo para encontrar **tu propio** teléfono. Funciona captando la
+señal Bluetooth que cualquier teléfono cercano esté transmitiendo — eso no
+es una invitación a apuntarlo hacia el de alguien más.
+
+### ¿Quieres los detalles técnicos?
+
+Cómo funciona por dentro, por qué usa Google Fast Pair, y el crédito de
+diseño de la idea original están en **[docs/TECHNICAL.md](docs/TECHNICAL.md)**,
+fuera de esta página a propósito.
+
+---
+
+<p align="center">
+Hecho por <b>Luis Felipe Ariza Vesga</b> con amor · <a href="mailto:lfarizav@gmail.com">lfarizav@gmail.com</a><br>
+Code licensed under <a href="LICENSE">Apache License 2.0</a>.
+</p>
